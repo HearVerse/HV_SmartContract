@@ -14,3 +14,8 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.js
 ```
+
+
+## HV Smart contract architecture
+
+![HV_smart contract](https://user-images.githubusercontent.com/82324643/221368106-459d86a2-636e-41db-9e86-98b478a5a39a.jpg)
