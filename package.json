@@ -1,0 +1,27 @@
+{
+  "name": "hv_smartcontract",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HearVerse/HV_SmartContract.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HearVerse/HV_SmartContract/issues"
+  },
+  "homepage": "https://github.com/HearVerse/HV_SmartContract#readme",
+  "devDependencies": {
+    "hardhat": "^2.12.7"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1",
+    "@openzeppelin/contracts": "^4.8.1"
+  }
+}
