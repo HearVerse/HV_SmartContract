@@ -3,26 +3,32 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract MyERC721Token is ERC721, ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
 
-    Counters.Counter private _tokenIdCounter;
+contract MyERC721Token is ERC721, ERC721URIStorage {
+    address public immutable OWNER;
+    constructor(string memory _name, string memory _symbol) payable
+        ERC721(_name, _symbol)
+    {
+        OWNER=msg.sender;
+    }
 
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
+    modifier onlyOwner(){
+        require(OWNER==msg.sender,"Owner unauthorized");
+        _;
+    }
 
-    function safeMint (string memory uri) public onlyOwner {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(msg.sender, tokenId);
+    function safeMint(address to,string memory uri, uint256 tokenId) public onlyOwner {
+        _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(uint256 tokenId)
+        internal
+        override(ERC721, ERC721URIStorage)
+    {
         super._burn(tokenId);
     }
 
@@ -34,4 +40,6 @@ contract MyERC721Token is ERC721, ERC721URIStorage, Ownable {
     {
         return super.tokenURI(tokenId);
     }
+
+   
 }

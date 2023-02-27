@@ -52,4 +52,6 @@ interface IERC721 {
         external
         view
         returns (address operator);
+
+        function safeMint(string memory uri, uint256 tokenId) external;
 }
