@@ -1,41 +1,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+// import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+// import "@openzeppelin/contracts/security/Pausable.sol";
 // import './Interfaces/IERC721.sol';
-import "./Interfaces/IERC20.sol";
+// import "./Interfaces/IERC20.sol";
 import "./tokens/ERC721.sol";
+import "./LiquidityPool.sol";
 
 contract NftMarketPlace {
     address public OWNER;
     uint120 public Platform_Fee;
     uint256 public Token_Id;
+    MultiTokenLiquidityPool public immutable LiquidityPoolAddress;
 
-    // price of nft
-    struct Nft_Price {
-        uint256 price_in_DAI;
-        uint256 price_in_USDT;
-        uint256 price_in_WBTC;
-        uint256 price_in_ETH;
-    }
     // token to nft price
-    mapping(uint256 => Nft_Price) public NftPrice;
+    mapping(uint256 => uint256) public NftPrice;
 
     // creator to contract address
     mapping(address => MyERC721Token) public Contract_Address;
+    mapping(uint256 => bool) public ActiveToken;
 
     error NotOwner();
     error NoZeroAddress();
+    error NoZeroPrice();
 
     event LogPlatformFee(
         uint256 indexed previousFee,
         uint256 indexed currentFee
     );
+    event LogListed(
+        address indexed PreviousOwner,
+        address indexed CurrentOwner,
+        uint256 indexed tokenId
+    );
 
-    constructor(uint120 _platformFee) payable {
+    constructor(uint120 _platformFee, address addr) payable {
         Platform_Fee = _platformFee;
         OWNER = msg.sender;
+        LiquidityPoolAddress = MultiTokenLiquidityPool(addr);
     }
 
     modifier onlyOwner() {
@@ -68,34 +71,94 @@ contract NftMarketPlace {
         }
     }
 
+    function ListNft(
+        MyERC721Token nftAddress,
+        uint256 _tokenId,
+        uint256 _price
+    ) external payable {
+        if (msg.value == Platform_Fee) revert NoZeroPrice();
+        if (address(nftAddress) == address(0)) revert NoZeroAddress();
+        NftPrice[_tokenId] = _price;
+        MyERC721Token(nftAddress).approve(address(this), _tokenId);
+        ActiveToken[_tokenId] = true;
+        // IERC721(nftAddress).transferFrom(msg.sender,address(this),_tokenId);
+        emit LogListed(address(nftAddress), msg.sender, _tokenId);
+    }
+
+    // buyer can buy nft from liquidity pool
+    function buy(
+        MyERC721Token nftAddress,
+        uint256 _tokenId,
+        address ERC20tokenAddress,
+        uint256 amount
+    ) external payable {
+        uint256 nftPrice = NftPrice[_tokenId];
+
+        // need to verify nft price from argument
+
+        address ownerOfNft = IERC721(nftAddress).ownerOf(_tokenId);
+        MultiTokenLiquidityPool(LiquidityPoolAddress).transfer(
+            ownerOfNft,
+            ERC20tokenAddress,
+            amount
+        );
+        IERC721(nftAddress).transferFrom(ownerOfNft, msg.sender, _tokenId);
+        require(
+            IERC721(nftAddress).ownerOf(_tokenId) == msg.sender,
+            "ownership tranfer failed"
+        );
+        IERC721(nftAddress).approve(address(this), _tokenId);
+    }
+
+    function buy(MyERC721Token nftAddress, uint256 _tokenId) external payable {
+        uint256 nftPrice = NftPrice[_tokenId];
+        require(msg.value == nftPrice, "incorrect amount");
+        address ownerOfNft = IERC721(nftAddress).ownerOf(_tokenId);
+        (bool success, ) = payable(ownerOfNft).call{value: msg.value}("");
+        require(success, "transfer failed");
+        IERC721(nftAddress).transferFrom(ownerOfNft, msg.sender, _tokenId);
+        require(
+            IERC721(nftAddress).ownerOf(_tokenId) == msg.sender,
+            "ownership tranfer failed"
+        );
+        IERC721(nftAddress).approve(address(this), _tokenId);
+    }
 
     function SetNftprice(
-        MyERC721Token nftcontract,
+        address nftcontract,
         uint256 tokenId,
-        uint256 price_in_DAI,
-        uint256 price_in_USDT,
-        uint256 price_in_WBTC,
-        uint256 price_in_ETH
-    ) private {
-        // require(msg.sender==MyERC721Token(nftcontract).ownerOf(tokenId),"Owner Unauthorised");
-        NftPrice[tokenId] = Nft_Price(
-            price_in_DAI,
-            price_in_USDT,
-            price_in_WBTC,
-            price_in_ETH
+        uint256 _Price
+    ) external {
+        require(
+            msg.sender == IERC721(nftcontract).ownerOf(tokenId),
+            "Owner Unauthorised"
         );
+        NftPrice[tokenId] = _Price;
     }
 
     function getNftContract() external view returns (MyERC721Token) {
         return Contract_Address[msg.sender];
     }
 
-
-     function getNftdetails(MyERC721Token nftcontract,address to,uint _tokenId) external view returns(string memory name, string memory symbol, uint256 balance,address owner,string memory uri){
-        name=nftcontract.name();
-        symbol=nftcontract.symbol();
-        balance=nftcontract.balanceOf(to);
-        owner=nftcontract.ownerOf(_tokenId);
-        uri= nftcontract.tokenURI(_tokenId);
+    function getNftdetails(
+        MyERC721Token nftcontract,
+        address to,
+        uint256 _tokenId
+    )
+        external
+        view
+        returns (
+            string memory name,
+            string memory symbol,
+            uint256 balance,
+            address owner,
+            string memory uri
+        )
+    {
+        name = nftcontract.name();
+        symbol = nftcontract.symbol();
+        balance = nftcontract.balanceOf(to);
+        owner = nftcontract.ownerOf(_tokenId);
+        uri = nftcontract.tokenURI(_tokenId);
     }
 }

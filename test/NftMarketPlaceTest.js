@@ -14,7 +14,7 @@ describe("nft market place contract testing", async () => {
     var amount = 1000000;
 
     // define erc721 token address
-    var NFT_MarketPlace, NFT_contract,
+    var NFT_MarketPlace, NFT_contract,LiquidityPool,
         Opensea_MarketPlace = null;
 
     // define all clients and owner
@@ -56,7 +56,11 @@ describe("nft market place contract testing", async () => {
         HVT.mint(ACCOUNTS[firstOwner_Id].address, amount);
 
         // deploy all erc721 tokens
-
+            const token6 = await ethers.getContractFactory(
+              "MultiTokenLiquidityPool"
+            );
+            LiquidityPool = await token6.connect(ACCOUNTS[deployer_Id]).deploy(
+            );
         // deploy opensea erc721 token
         const Token4 = await ethers.getContractFactory("MyERC721Token");
         Opensea_MarketPlace = await Token4.connect(ACCOUNTS[deployer_Id]).deploy(
@@ -69,10 +73,13 @@ describe("nft market place contract testing", async () => {
             5
         );
 
+        // deploy liquidity pool
+
+
         // deploy NFT MArket place contract token
         const Token5 = await ethers.getContractFactory("NftMarketPlace");
         NFT_MarketPlace = await Token5.connect(ACCOUNTS[deployer_Id]).deploy(
-            ethers.utils.parseEther("0.001")
+            ethers.utils.parseEther("0.001"),LiquidityPool.address
         );
         //mint nft token for 2nd owner
 
