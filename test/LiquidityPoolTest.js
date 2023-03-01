@@ -161,4 +161,32 @@ describe("MultiTokenLiquidityPool", function () {
             await liquidityPool.getBalance(user2.address, daiToken.address)
         ).to.equal(amount);
     });
+    it("should able to withdraw all erc20 tokens", async ()=>{
+
+        const amount = ethers.utils.parseUnits("100", 18);
+        const usdcamount = ethers.utils.parseUnits("1000", 6);
+        await liquidityPool.addToken(daiToken.address);
+        await daiToken.connect(user1).approve(liquidityPool.address, amount);
+        await liquidityPool.connect(user1).deposit(daiToken.address, amount);
+        await liquidityPool.addToken(usdcToken.address);
+        await usdcToken.connect(user1).approve(liquidityPool.address, amount);
+        await liquidityPool.connect(user1).deposit(usdcToken.address, usdcamount);
+        expect(await daiToken.balanceOf(liquidityPool.address)).to.equal(amount);
+        await liquidityPool.connect(user1).withdrawAll([daiToken.address, usdcToken.address]);
+                expect(
+                  await daiToken.balanceOf(liquidityPool.address)
+                ).to.equal(0);
+                expect(
+                  await usdcToken.balanceOf(liquidityPool.address)
+                ).to.equal(0);
+
+
+
+
+
+
+
+
+
+    })
 });
