@@ -4,6 +4,7 @@ import "./Interfaces/IERC20.sol";
 
 
 contract MultiTokenLiquidityPool {
+    // ower address=>token address------->balance
     mapping(address => mapping(address => uint256)) public balances;
     mapping(address => bool) public tokens;
 
@@ -30,8 +31,9 @@ contract MultiTokenLiquidityPool {
 
     function deposit(address token, uint256 amount) external {
         require(tokens[token], "Token not supported.");
-        require(amount > 0, "Amount must be greater than zero.");
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
+        require(IERC20(token).balanceOf(msg.sender)>=amount, "insufficient amount");
+            /// approve token for this liquidity pool contract
+        IERC20(token).transferFrom(msg.sender,address(this), amount);
         balances[msg.sender][token] += amount;
     }
 
@@ -50,7 +52,7 @@ contract MultiTokenLiquidityPool {
             balances[to][token]+=amount;
     }
 
-    function getBalance(address token, address account) external view returns (uint256) {
+    function getBalance( address account,address token) external view returns (uint256) {
         return balances[account][token];
     }
 

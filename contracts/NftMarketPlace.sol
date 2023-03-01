@@ -92,9 +92,8 @@ contract NftMarketPlace {
         address ERC20tokenAddress,
         uint256 amount
     ) external payable {
-        uint256 nftPrice = NftPrice[_tokenId];
-
-        // need to verify nft price from argument
+        require(ActiveToken[_tokenId],"Nft not listed");
+        uint256 nftPrice = NftPrice[_tokenId]; // amount should equivalent to nft price.
 
         address ownerOfNft = IERC721(nftAddress).ownerOf(_tokenId);
         MultiTokenLiquidityPool(LiquidityPoolAddress).transfer(
@@ -111,6 +110,7 @@ contract NftMarketPlace {
     }
 
     function buy(MyERC721Token nftAddress, uint256 _tokenId) external payable {
+        require(ActiveToken[_tokenId],"token not listed");
         uint256 nftPrice = NftPrice[_tokenId];
         require(msg.value == nftPrice, "incorrect amount");
         address ownerOfNft = IERC721(nftAddress).ownerOf(_tokenId);
