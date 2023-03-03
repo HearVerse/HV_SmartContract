@@ -151,7 +151,7 @@ describe("MultiTokenLiquidityPool", function () {
         expect(await daiToken.balanceOf(liquidityPool.address)).to.equal(amount);
         await liquidityPool
             .connect(user1)
-            .transfer(user2.address, daiToken.address, amount);
+            .Transfer(user1.address,user2.address, daiToken.address, amount);
 
         expect(
             await liquidityPool.getBalance(user1.address, daiToken.address)
@@ -161,7 +161,7 @@ describe("MultiTokenLiquidityPool", function () {
             await liquidityPool.getBalance(user2.address, daiToken.address)
         ).to.equal(amount);
     });
-    it("should able to withdraw all erc20 tokens", async ()=>{
+    it("should able to withdraw all erc20 tokens", async () => {
 
         const amount = ethers.utils.parseUnits("100", 18);
         const usdcamount = ethers.utils.parseUnits("1000", 6);
@@ -173,20 +173,11 @@ describe("MultiTokenLiquidityPool", function () {
         await liquidityPool.connect(user1).deposit(usdcToken.address, usdcamount);
         expect(await daiToken.balanceOf(liquidityPool.address)).to.equal(amount);
         await liquidityPool.connect(user1).withdrawAll([daiToken.address, usdcToken.address]);
-                expect(
-                  await daiToken.balanceOf(liquidityPool.address)
-                ).to.equal(0);
-                expect(
-                  await usdcToken.balanceOf(liquidityPool.address)
-                ).to.equal(0);
-
-
-
-
-
-
-
-
-
+        expect(
+            await daiToken.balanceOf(liquidityPool.address)
+        ).to.equal(0);
+        expect(
+            await usdcToken.balanceOf(liquidityPool.address)
+        ).to.equal(0);
     })
 });
