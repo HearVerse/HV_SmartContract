@@ -66,16 +66,17 @@ contract MultiTokenLiquidityPool {
     }
 
     function Transfer(
+        address from,
         address to,
         address token,
         uint256 amount
     ) external {
         require(tokens[token], "Token not supported.");
-        require(balances[msg.sender][token] >= amount, "Insufficient balance.");
+        require(balances[from][token] >= amount, "Insufficient balance.");
         require(amount != 0, "Amount must be greater than zero.");
-        balances[msg.sender][token] -= amount;
+        balances[from][token] -= amount;
         balances[to][token] += amount;
-        emit LogTransfer(token, msg.sender, to, amount);
+        emit LogTransfer(token, from, to, amount);
     }
 
     function getBalance(address account, address token)
