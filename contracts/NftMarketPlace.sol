@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity >=0.4.22 <0.9.0;
 // import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 // import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // import "@openzeppelin/contracts/security/Pausable.sol";
 // import './Interfaces/IERC721.sol';
 // import "./Interfaces/IERC20.sol";
+// import "./UniswapV3Price.sol";
 import "./tokens/ERC721.sol";
 import "./LiquidityPool.sol";
 import "hardhat/console.sol";
@@ -14,6 +15,7 @@ contract NftMarketPlace {
     uint120 public Platform_Fee;
     uint256 public Id;
     MultiTokenLiquidityPool public immutable LiquidityPoolAddress;
+    // UniswapV3Price public immutable PriceOracle;
 
     // token to nft price
     mapping(uint256 => uint256) public NftPrice;
@@ -44,10 +46,12 @@ contract NftMarketPlace {
         uint256 indexed tokenId
     );
 
-    constructor(uint120 _platformFee, address addr) payable {
+    constructor(uint120 _platformFee, address Liqudityaddr /*,address oracle*/) payable {
         Platform_Fee = _platformFee;
         OWNER = msg.sender;
-        LiquidityPoolAddress = MultiTokenLiquidityPool(addr);
+        LiquidityPoolAddress = MultiTokenLiquidityPool(Liqudityaddr);
+        // PriceOracle=UniswapV3Price(oracle); 
+
     }
 
     modifier onlyOwner() {
@@ -86,7 +90,10 @@ contract NftMarketPlace {
         NftParams memory nftdetails = NftDetails[nftAddress][_tokenId];
         require(nftdetails.ActiveToken, "token not listed");
         uint256 nftPrice = nftdetails.price;
-        // need to verify nftprice with erc20 amount
+        console.log("price of nft",nftPrice);
+        // UniswapV3Twap.estimateAmountOut(ERC20tokenAddress, amountIn, secondsAgo); 
+        // address WETH=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+        // uint amount=PriceOracle.estimateAmountOut(WETH,ERC20tokenAddress,nftPrice,100,300);
 
         address ownerOfNft = IERC721(nftAddress).ownerOf(_tokenId);
         uint royalityFee=(amount*nftdetails.Royality)/100;
