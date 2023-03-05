@@ -18,10 +18,19 @@
   },
   "homepage": "https://github.com/HearVerse/HV_SmartContract#readme",
   "devDependencies": {
-    "hardhat": "^2.12.7"
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "chai": "^4.3.6",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.6.1",
+    "hardhat": "^2.9.1"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
-    "@openzeppelin/contracts": "^4.8.1"
+    "@openzeppelin/contracts": "^4.8.1",
+    "@uniswap/v3-core": "^1.0.1",
+    "@uniswap/v3-periphery": "^1.4.3",
+    "prettier": "^2.6.0",
+    "prettier-plugin-solidity": "^1.0.0-beta.19"
   }
 }
