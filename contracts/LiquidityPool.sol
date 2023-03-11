@@ -2,8 +2,10 @@
 pragma solidity >=0.4.22 <0.9.0;
 import "./Interfaces/IERC20.sol";
 
+// where is the access this contract can be receive eth?!
+
 contract MultiTokenLiquidityPool {
-    // ower address=>token address------->balance
+    // owner address=>token address------->balance
     mapping(address => mapping(address => uint256)) public balances;
     mapping(address => bool) public tokens;
 
